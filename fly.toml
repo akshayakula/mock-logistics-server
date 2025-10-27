@@ -23,3 +23,7 @@ primary_region = "iad"
   NODE_ENV = "production"
   PORT = "3000"
 
+[mounts]
+  source = "data"
+  destination = "/app/data"
+
