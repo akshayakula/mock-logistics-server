@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { mockLoads } from '../data/mockLoads';
+import { getAllLoads, updateLoad } from '../data/storage';
 import { Load, LoadQueryParams } from '../types/load';
 
 const router = Router();
@@ -12,8 +12,8 @@ router.get('/', (req: Request, res: Response): void => {
   try {
     const query = req.query as LoadQueryParams;
     
-    // Start with all non-booked loads
-    let availableLoads = mockLoads.filter(load => !load.booked);
+    // Start with all non-booked loads from persistent storage
+    let availableLoads = getAllLoads().filter(load => !load.booked);
     
     // Apply filters based on query parameters
     
@@ -141,8 +141,9 @@ router.post('/:load_id/book', (req: Request, res: Response): void => {
   try {
     const { load_id } = req.params;
     
-    // Find the load by ID
-    const load = mockLoads.find(l => l.load_id === load_id);
+    // Find the load by ID from persistent storage
+    const loads = getAllLoads();
+    const load = loads.find(l => l.load_id === load_id);
     
     if (!load) {
       res.status(404).json({
@@ -161,12 +162,12 @@ router.post('/:load_id/book', (req: Request, res: Response): void => {
       return;
     }
     
-    // Mark as booked
-    load.booked = true;
+    // Mark as booked in persistent storage
+    const updatedLoad = updateLoad(load_id, { booked: true });
     
     res.json({
       message: 'Load successfully booked',
-      load
+      load: updatedLoad
     });
   } catch (error) {
     res.status(500).json({

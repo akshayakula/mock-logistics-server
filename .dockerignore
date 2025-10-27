@@ -6,4 +6,5 @@ dist
 *.md
 npm-debug.log
 .DS_Store
+data/
 

@@ -48,7 +48,7 @@ const generateMockLoads = (): Load[] => {
 
   const loads: Load[] = [];
 
-  for (let i = 1; i <= 80; i++) {
+  for (let i = 1; i <= 100; i++) {
     const origin = cities[Math.floor(Math.random() * cities.length)];
     let destination = cities[Math.floor(Math.random() * cities.length)];
     
@@ -106,7 +106,7 @@ const generateMockLoads = (): Load[] => {
       run_type,
       origin_state: origin.state,
       destination_state: destination.state,
-      booked: Math.random() < 0.15, // 15% of loads are already booked
+      booked: false, // All loads available by default
       best_load_score,
       rpm: parseFloat(rpm.toFixed(2))
     });
