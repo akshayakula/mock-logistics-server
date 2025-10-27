@@ -1,14 +1,15 @@
 === MOCK LOGISTICS API - QUICK START ===
 
 API URL: https://mock-logistics-server.fly.dev
-API KEY: acme_dev_c4a9d02fb3
-Auth Header: X-API-Key: acme_dev_c4a9d02fb3
+API KEY: [YOUR-API-KEY-HERE]
+(Get from .env file or contact administrator)
+Auth Header: X-API-Key: [YOUR-API-KEY-HERE]
 
 === ENDPOINT 1: FIND LOADS ===
 
 GET /api/loads - Find the best available freight load
 
-Required Header: X-API-Key: acme_dev_c4a9d02fb3
+Required Header: X-API-Key: [YOUR-API-KEY-HERE]
 
 Query Parameters (all optional):
 - origin_state: TX, CA, FL, NY, etc.
@@ -21,15 +22,15 @@ Query Parameters (all optional):
 - min_weight, max_weight: weight in pounds
 
 Example 1: Find any load
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads"
 
 Example 2: Find Reefer loads from TX with good pay
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&equipment_type=Reefer&min_rpm=2.5"
 
 Example 3: Find high-value short-haul loads
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?min_price=3000&max_miles=1500"
 
 Response (success):
@@ -58,11 +59,11 @@ Response (no matches):
 
 POST /api/loads/:load_id/book - Book a specific load
 
-Required Header: X-API-Key: acme_dev_c4a9d02fb3
+Required Header: X-API-Key: [YOUR-API-KEY-HERE]
 
 Example: Book load L-1088
 curl -X POST \
-  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads/L-1088/book"
 
 Response (success):
@@ -84,12 +85,12 @@ Response (already booked):
 === WORKFLOW EXAMPLE ===
 
 1. Find a load:
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&min_rpm=2.0"
 
 2. Book it (use load_id from response):
 curl -X POST \
-  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads/L-XXXX/book"
 
 === QUICK TIPS ===

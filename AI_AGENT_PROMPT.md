@@ -8,11 +8,12 @@ Use this API to search for freight loads and book them.
 
 **API Base URL**: `https://mock-logistics-server.fly.dev`
 
-**API Key**: `acme_dev_c4a9d02fb3`
+**API Key**: `[YOUR-API-KEY-HERE]`  
+_(Get your API key from the .env file or contact the administrator)_
 
 **Authentication Method**: Include the API key in the request headers
 
-**Header Format**: `X-API-Key: acme_dev_c4a9d02fb3`
+**Header Format**: `X-API-Key: [YOUR-API-KEY-HERE]`
 
 ---
 
@@ -26,7 +27,7 @@ Search for the best available freight load based on your criteria. Returns ONE l
 
 **Base Request**:
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads"
 ```
 
@@ -56,7 +57,7 @@ All parameters are **optional**. Use any combination to filter loads:
 
 **1. Find any available load:**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads"
 ```
 
@@ -147,7 +148,7 @@ curl -X POST \
 **2. Book the load you just found:**
 ```bash
 # Step 1: Find a load
-LOAD=$(curl -s -H "X-API-Key: acme_dev_c4a9d02fb3" \
+LOAD=$(curl -s -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX")
 
 # Step 2: Extract load_id
@@ -155,7 +156,7 @@ LOAD_ID=$(echo $LOAD | jq -r '.load_id')
 
 # Step 3: Book it
 curl -X POST \
-  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads/$LOAD_ID/book"
 ```
 
@@ -213,32 +214,32 @@ curl -X POST \
 ### Workflow 1: Find and Book Best Load
 ```bash
 # 1. Find best available load
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads"
 
 # 2. Book it (replace L-XXXX with actual load_id from response)
-curl -X POST -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -X POST -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads/L-XXXX/book"
 ```
 
 ### Workflow 2: Find High-Paying Reefer Loads
 ```bash
 # Search for reefer loads with RPM > 2.5 and price > $3000
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?equipment_type=Reefer&min_rpm=2.5&min_price=3000"
 ```
 
 ### Workflow 3: Find Loads from Specific Origin
 ```bash
 # Find loads originating in Texas
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX"
 ```
 
 ### Workflow 4: Find Short-Haul, High-Value Loads
 ```bash
 # Loads under 1500 miles with price over $2500
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?max_miles=1500&min_price=2500"
 ```
 
@@ -286,7 +287,7 @@ curl "https://mock-logistics-server.fly.dev/"
 
 **Always include this header for `/api/loads` endpoints:**
 ```
-X-API-Key: acme_dev_c4a9d02fb3
+X-API-Key: [YOUR-API-KEY-HERE]
 ```
 
 ### Equipment Types Available
@@ -331,7 +332,7 @@ X-API-Key: acme_dev_c4a9d02fb3
 
 ```bash
 # Set API credentials
-export API_KEY="acme_dev_c4a9d02fb3"
+export API_KEY="[YOUR-API-KEY-HERE]"
 export API_URL="https://mock-logistics-server.fly.dev"
 
 # Test 1: Get API status
@@ -355,7 +356,7 @@ curl -X POST -H "X-API-Key: $API_KEY" "$API_URL/api/loads/L-1050/book"
 ## 📞 API Support
 
 - **Base URL**: https://mock-logistics-server.fly.dev
-- **API Key**: `acme_dev_c4a9d02fb3`
+- **API Key**: Get from .env file or administrator
 - **Total Loads**: 100 realistic freight loads
 - **Persistence**: Bookings persist across server restarts
 - **CORS**: Enabled for all origins
