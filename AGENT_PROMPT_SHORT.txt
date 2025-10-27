@@ -1,0 +1,102 @@
+=== MOCK LOGISTICS API - QUICK START ===
+
+API URL: https://mock-logistics-server.fly.dev
+API KEY: acme_dev_c4a9d02fb3
+Auth Header: X-API-Key: acme_dev_c4a9d02fb3
+
+=== ENDPOINT 1: FIND LOADS ===
+
+GET /api/loads - Find the best available freight load
+
+Required Header: X-API-Key: acme_dev_c4a9d02fb3
+
+Query Parameters (all optional):
+- origin_state: TX, CA, FL, NY, etc.
+- destination_state: TX, CA, FL, NY, etc.
+- equipment_type: "Dry Van", "Reefer", "Flatbed", "Step Deck", "Box Truck", "Tanker"
+- min_price, max_price: numbers (e.g., 1000, 5000)
+- min_rpm, max_rpm: rate per mile (e.g., 2.0, 3.0)
+- min_miles, max_miles: distance (e.g., 500, 2000)
+- commodity_type: "Electronics", "Food & Beverage", "Machinery", etc.
+- min_weight, max_weight: weight in pounds
+
+Example 1: Find any load
+curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads"
+
+Example 2: Find Reefer loads from TX with good pay
+curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&equipment_type=Reefer&min_rpm=2.5"
+
+Example 3: Find high-value short-haul loads
+curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads?min_price=3000&max_miles=1500"
+
+Response (success):
+{
+  "load_id": "L-1088",
+  "origin": "Houston, TX",
+  "destination": "New York, NY",
+  "pickup_datetime": "2025-11-06T00:42:04.040Z",
+  "delivery_datetime": "2025-11-07T00:42:04.040Z",
+  "equipment_type": "Step Deck",
+  "loadboard_rate": 4705,
+  "weight": 22547,
+  "commodity_type": "Consumer Goods",
+  "miles": 1748,
+  "booked": false,
+  "rpm": 2.69
+}
+
+Response (no matches):
+{
+  "error": "No loads found",
+  "message": "No available loads match the specified criteria"
+}
+
+=== ENDPOINT 2: BOOK A LOAD ===
+
+POST /api/loads/:load_id/book - Book a specific load
+
+Required Header: X-API-Key: acme_dev_c4a9d02fb3
+
+Example: Book load L-1088
+curl -X POST \
+  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads/L-1088/book"
+
+Response (success):
+{
+  "message": "Load successfully booked",
+  "load": {
+    "load_id": "L-1088",
+    "booked": true,
+    ...rest of load data
+  }
+}
+
+Response (already booked):
+{
+  "error": "Load already booked",
+  "message": "Load L-1088 has already been booked"
+}
+
+=== WORKFLOW EXAMPLE ===
+
+1. Find a load:
+curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&min_rpm=2.0"
+
+2. Book it (use load_id from response):
+curl -X POST \
+  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  "https://mock-logistics-server.fly.dev/api/loads/L-XXXX/book"
+
+=== QUICK TIPS ===
+
+- API returns ONE best load per search (highest score)
+- Bookings persist - once booked, stays booked
+- 100 total loads available
+- URL encode spaces: "Dry Van" → "Dry%20Van"
+- Always include the X-API-Key header for /api/loads endpoints
+
