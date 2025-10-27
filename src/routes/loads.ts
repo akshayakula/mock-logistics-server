@@ -111,11 +111,27 @@ router.get('/', (req: Request, res: Response): void => {
       availableLoads = availableLoads.filter(load => load.weight <= maxWeight);
     }
     
-    // If no loads match the filters, return 404
+    // If no loads match the filters, fall back to best available load
     if (availableLoads.length === 0) {
-      res.status(404).json({
-        error: 'No loads found',
-        message: 'No available loads match the specified criteria'
+      // Get all available loads without filters as fallback
+      const allAvailable = getAllLoads().filter(load => !load.booked);
+      
+      if (allAvailable.length === 0) {
+        res.status(404).json({
+          error: 'No loads available',
+          message: 'All loads are currently booked'
+        });
+        return;
+      }
+      
+      // Return best available load with a flag indicating it's a fallback
+      allAvailable.sort((a, b) => b.best_load_score - a.best_load_score);
+      const fallbackLoad = allAvailable[0];
+      
+      res.json({
+        ...fallbackLoad,
+        _fallback: true,
+        _message: 'No exact matches found. Returning best available load.'
       });
       return;
     }
