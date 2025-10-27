@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Mock Logistics Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --primary: 222.2 47.4% 11.2%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96.1%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 222.2 84% 4.9%;
+            --radius: 0.5rem;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: hsl(var(--foreground));
+        }
+
+        .header p {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-form {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .auth-form input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid hsl(var(--input));
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background: hsl(var(--background));
+            transition: border-color 0.2s;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card h3 {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 1rem;
+            height: 1rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+
+        .map-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: hsl(var(--foreground));
+        }
+
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: hsl(var(--muted));
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        #us-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .breakdown {
+            margin-bottom: 1.5rem;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .breakdown-item {
+            padding: 0.75rem;
+            background: hsl(var(--muted));
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .breakdown-item .label {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+
+        .breakdown-item .count {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            padding: 0.125rem 0.5rem;
+            border-radius: calc(var(--radius) - 2px);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .entries-section {
+            margin-top: 1.5rem;
+        }
+
+        .entry-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .entry-id {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            font-size: 0.875rem;
+        }
+
+        .entry-time {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.75rem;
+        }
+
+        .entry-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .entry-field {
+            font-size: 0.875rem;
+        }
+
+        .entry-field .field-name {
+            color: hsl(var(--muted-foreground));
+            font-weight: 500;
+        }
+
+        .entry-field .field-value {
+            color: hsl(var(--foreground));
+            margin-left: 0.25rem;
+        }
+
+        .error {
+            background: hsl(0 84.2% 60.2% / 0.1);
+            color: hsl(0 84.2% 60.2%);
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border-left: 3px solid hsl(0 84.2% 60.2%);
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-booking {
+            background: hsl(142.1 76.2% 36.3% / 0.1);
+            color: hsl(142.1 76.2% 36.3%);
+        }
+
+        .badge-search {
+            background: hsl(221.2 83.2% 53.3% / 0.1);
+            color: hsl(221.2 83.2% 53.3%);
+        }
+
+        .badge-other {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+        }
+
+        .classification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .classification-successful {
+            background: hsl(142.1 76.2% 36.3% / 0.15);
+            color: hsl(142.1 70% 30%);
+            border: 1.5px solid hsl(142.1 76.2% 36.3%);
+        }
+
+        .classification-failed-price {
+            background: hsl(25 95% 53% / 0.15);
+            color: hsl(25 90% 35%);
+            border: 1.5px solid hsl(25 95% 53%);
+        }
+
+        .classification-failed-mc {
+            background: hsl(0 84.2% 60.2% / 0.15);
+            color: hsl(0 80% 40%);
+            border: 1.5px solid hsl(0 84.2% 60.2%);
+        }
+
+        .classification-failed-matching {
+            background: hsl(262.1 83.3% 57.8% / 0.15);
+            color: hsl(262.1 80% 40%);
+            border: 1.5px solid hsl(262.1 83.3% 57.8%);
+        }
+
+        .classification-badge svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .entry-details {
+                grid-template-columns: 1fr;
+            }
+
+            #map-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Analytics Dashboard</h1>
+            <p>Real-time logistics analytics and shipment tracking</p>
+        </div>
+
+        <div class="card">
+            <form class="auth-form" id="authForm">
+                <input 
+                    type="text" 
+                    id="apiKeyInput" 
+                    placeholder="Enter API Key (e.g., YOUR-API-KEY)" 
+                    required
+                />
+                <button type="submit" class="btn">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    View Analytics
+                </button>
+            </form>
+        </div>
+
+        <div id="errorMessage"></div>
+
+        <div id="dashboard" class="dashboard">
+            <div class="toolbar">
+                <button class="btn btn-secondary" onclick="loadAnalytics()">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                </button>
+                <button class="btn btn-secondary" onclick="generateMockData()">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Generate Mock Data
+                </button>
+                <button class="btn btn-secondary" onclick="clearAllData()" style="margin-left: auto;">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Clear All Data
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Total Entries</h3>
+                        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div class="value" id="totalEntries">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Bookings</h3>
+                        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                    </div>
+                    <div class="value" id="totalBookings">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Searches</h3>
+                        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div class="value" id="totalSearches">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Unique Carriers</h3>
+                        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="value" id="uniqueMC">0</div>
+                </div>
+            </div>
+
+            <div class="card map-section">
+                <h2>Shipment Routes</h2>
+                <div id="map-container">
+                    <svg id="us-map" viewBox="0 0 960 600"></svg>
+                </div>
+            </div>
+
+            <div class="card breakdown">
+                <h2>Origin States</h2>
+                <div class="breakdown-grid" id="originStates"></div>
+            </div>
+
+            <div class="card breakdown">
+                <h2>Destination States</h2>
+                <div class="breakdown-grid" id="destStates"></div>
+            </div>
+
+            <div class="card breakdown">
+                <h2>Motor Carriers</h2>
+                <div class="breakdown-grid" id="mcNumbers"></div>
+            </div>
+
+            <div class="card breakdown">
+                <h2>Call Classifications</h2>
+                <div class="breakdown-grid" id="classifications"></div>
+            </div>
+
+            <div class="card entries-section">
+                <h2>Recent Entries</h2>
+                <div id="entriesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        const API_BASE_URL = window.location.origin;
+
+        // State coordinates (approximate centers)
+        const stateCoords = {
+            'AL': [480, 380], 'AK': [120, 520], 'AZ': [230, 370], 'AR': [440, 360],
+            'CA': [160, 300], 'CO': [330, 290], 'CT': [650, 200], 'DE': [630, 250],
+            'FL': [580, 470], 'GA': [540, 390], 'HI': [220, 520], 'ID': [240, 180],
+            'IL': [480, 260], 'IN': [520, 260], 'IA': [450, 230], 'KS': [400, 300],
+            'KY': [520, 300], 'LA': [450, 420], 'ME': [680, 140], 'MD': [620, 260],
+            'MA': [660, 190], 'MI': [540, 200], 'MN': [420, 160], 'MS': [460, 390],
+            'MO': [450, 300], 'MT': [300, 140], 'NE': [380, 250], 'NV': [200, 270],
+            'NH': [660, 170], 'NJ': [640, 240], 'NM': [310, 370], 'NY': [620, 200],
+            'NC': [580, 340], 'ND': [370, 140], 'OH': [550, 260], 'OK': [390, 350],
+            'OR': [180, 160], 'PA': [600, 250], 'RI': [660, 200], 'SC': [570, 370],
+            'SD': [370, 190], 'TN': [510, 340], 'TX': [370, 420], 'UT': [260, 280],
+            'VT': [650, 160], 'VA': [600, 290], 'WA': [180, 120], 'WV': [570, 280],
+            'WI': [470, 190], 'WY': [300, 220]
+        };
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (apiKey) {
+                await loadAnalytics();
+            }
+        });
+
+        async function loadAnalytics() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = '';
+
+            if (!apiKey) {
+                showError('Please enter an API key');
+                return;
+            }
+
+            try {
+                document.getElementById('dashboard').classList.add('active');
+                
+                const statsResponse = await fetch(`${API_BASE_URL}/api/analytics/stats`, {
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                if (!statsResponse.ok) {
+                    throw new Error('Invalid API key or server error');
+                }
+
+                const stats = await statsResponse.json();
+                const entriesResponse = await fetch(`${API_BASE_URL}/api/analytics`, {
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                const entriesData = await entriesResponse.json();
+
+                updateStats(stats, entriesData);
+                updateEntries(entriesData.data);
+                drawMap(entriesData.data);
+
+            } catch (error) {
+                showError(error.message);
+                document.getElementById('dashboard').classList.remove('active');
+            }
+        }
+
+        function updateStats(stats, entriesData) {
+            document.getElementById('totalEntries').textContent = stats.total_entries;
+            document.getElementById('totalBookings').textContent = stats.by_action_type.booking || 0;
+            document.getElementById('totalSearches').textContent = stats.by_action_type.search || 0;
+            document.getElementById('uniqueMC').textContent = Object.keys(stats.by_mc_number).length;
+
+            updateBreakdown('originStates', stats.by_origin_state);
+            updateBreakdown('destStates', stats.by_destination_state);
+            updateBreakdown('mcNumbers', stats.by_mc_number);
+            updateBreakdown('classifications', stats.by_classification || {});
+        }
+
+        function updateBreakdown(elementId, data) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+
+            if (Object.keys(data).length === 0) {
+                container.innerHTML = '<p style="color: hsl(var(--muted-foreground)); grid-column: 1/-1;">No data available</p>';
+                return;
+            }
+
+            Object.entries(data)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([key, value]) => {
+                    const item = document.createElement('div');
+                    item.className = 'breakdown-item';
+                    item.innerHTML = `
+                        <span class="label">${key}</span>
+                        <span class="count">${value}</span>
+                    `;
+                    container.appendChild(item);
+                });
+        }
+
+        function updateEntries(entries) {
+            const container = document.getElementById('entriesList');
+            container.innerHTML = '';
+
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color: hsl(var(--muted-foreground)); text-align: center; padding: 1.5rem;">No analytics entries yet</p>';
+                return;
+            }
+
+            entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            entries.forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+
+                const actionType = entry.action_type || 'unknown';
+                const badgeClass = actionType === 'booking' ? 'badge-booking' : 
+                                   actionType === 'search' ? 'badge-search' : 'badge-other';
+
+                const timestamp = new Date(entry.timestamp).toLocaleString();
+
+                // Get classification badge
+                const classification = entry.classification || '';
+                let classificationHTML = '';
+                let classificationBadgeClass = '';
+                let classificationIcon = '';
+                
+                if (classification) {
+                    if (classification === 'Successful') {
+                        classificationBadgeClass = 'classification-successful';
+                        classificationIcon = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                    } else if (classification === 'Failed Price') {
+                        classificationBadgeClass = 'classification-failed-price';
+                        classificationIcon = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                    } else if (classification === 'Failed MC Validation') {
+                        classificationBadgeClass = 'classification-failed-mc';
+                        classificationIcon = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+                    } else if (classification === 'Failed Load Matching') {
+                        classificationBadgeClass = 'classification-failed-matching';
+                        classificationIcon = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                    }
+                    
+                    classificationHTML = `<div class="classification-badge ${classificationBadgeClass}">${classificationIcon}${classification}</div>`;
+                }
+
+                let detailsHTML = '';
+                for (const [key, value] of Object.entries(entry)) {
+                    if (key !== 'id' && key !== 'timestamp' && key !== 'action_type' && key !== 'classification') {
+                        detailsHTML += `
+                            <div class="entry-field">
+                                <span class="field-name">${key}:</span>
+                                <span class="field-value">${value}</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                card.innerHTML = `
+                    ${classificationHTML}
+                    <div class="entry-header">
+                        <div>
+                            <span class="entry-id">${entry.id}</span>
+                            <span class="badge ${badgeClass}">${actionType}</span>
+                        </div>
+                        <span class="entry-time">${timestamp}</span>
+                    </div>
+                    <div class="entry-details">
+                        ${detailsHTML}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function drawMap(entries) {
+            const svg = document.getElementById('us-map');
+            svg.innerHTML = '';
+
+            // Draw state dots
+            Object.entries(stateCoords).forEach(([state, [x, y]]) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '4');
+                circle.setAttribute('fill', 'hsl(var(--muted-foreground))');
+                circle.setAttribute('opacity', '0.3');
+                svg.appendChild(circle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', y - 8);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '10');
+                text.setAttribute('fill', 'hsl(var(--muted-foreground))');
+                text.setAttribute('opacity', '0.5');
+                text.textContent = state;
+                svg.appendChild(text);
+            });
+
+            // Draw shipment routes
+            const routes = new Map();
+            entries.forEach(entry => {
+                if (entry.origin_state && entry.destination_state && 
+                    stateCoords[entry.origin_state] && stateCoords[entry.destination_state]) {
+                    const key = `${entry.origin_state}-${entry.destination_state}`;
+                    routes.set(key, (routes.get(key) || 0) + 1);
+                }
+            });
+
+            routes.forEach((count, key) => {
+                const [origin, dest] = key.split('-');
+                const [x1, y1] = stateCoords[origin];
+                const [x2, y2] = stateCoords[dest];
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', 'hsl(var(--primary))');
+                line.setAttribute('stroke-width', Math.min(count * 2, 8));
+                line.setAttribute('opacity', '0.4');
+                svg.appendChild(line);
+
+                // Highlight origin
+                const originDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                originDot.setAttribute('cx', x1);
+                originDot.setAttribute('cy', y1);
+                originDot.setAttribute('r', '6');
+                originDot.setAttribute('fill', 'hsl(142.1 76.2% 36.3%)');
+                svg.appendChild(originDot);
+
+                // Highlight destination
+                const destDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                destDot.setAttribute('cx', x2);
+                destDot.setAttribute('cy', y2);
+                destDot.setAttribute('r', '6');
+                destDot.setAttribute('fill', 'hsl(221.2 83.2% 53.3%)');
+                svg.appendChild(destDot);
+            });
+        }
+
+        async function generateMockData() {
+            if (!apiKey) return;
+
+            const states = Object.keys(stateCoords).filter(s => !['AK', 'HI'].includes(s));
+            const mcNumbers = ['347040', '123456', '789012', '456789', '234567'];
+            const classifications = ['Successful', 'Failed Price', 'Failed MC Validation', 'Failed Load Matching'];
+            
+            for (let i = 0; i < 10; i++) {
+                const origin = states[Math.floor(Math.random() * states.length)];
+                let dest = states[Math.floor(Math.random() * states.length)];
+                while (dest === origin) {
+                    dest = states[Math.floor(Math.random() * states.length)];
+                }
+
+                const classification = classifications[Math.floor(Math.random() * classifications.length)];
+
+                const data = {
+                    classification: classification,
+                    mc_number: mcNumbers[Math.floor(Math.random() * mcNumbers.length)],
+                    origin_state: origin,
+                    destination_state: dest,
+                    load_id: `L-${Math.floor(Math.random() * 10000)}`,
+                    price: Math.floor(Math.random() * 5000) + 1000,
+                    miles: Math.floor(Math.random() * 2500) + 500,
+                    weight: Math.floor(Math.random() * 40000) + 10000,
+                    action_type: classification === 'Successful' ? 'booking' : 'search'
+                };
+
+                await fetch(`${API_BASE_URL}/api/analytics`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            loadAnalytics();
+        }
+
+        async function clearAllData() {
+            if (!apiKey) return;
+
+            const confirmed = confirm('Are you sure you want to clear all analytics data? This action cannot be undone.');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/analytics`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to clear analytics data');
+                }
+
+                const result = await response.json();
+                
+                // Reload the dashboard to show empty state
+                loadAnalytics();
+                
+                // Show success message briefly
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.innerHTML = '<div style="background: hsl(142.1 76.2% 36.3% / 0.1); color: hsl(142.1 76.2% 36.3%); padding: 0.75rem; border-radius: var(--radius); margin-bottom: 1.5rem; border-left: 3px solid hsl(142.1 76.2% 36.3%); font-size: 0.875rem;">' + result.message + '</div>';
+                setTimeout(() => {
+                    errorDiv.innerHTML = '';
+                }, 3000);
+
+            } catch (error) {
+                showError(error.message || 'Failed to clear analytics data');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Load analytics if API key is in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlApiKey = urlParams.get('api_key');
+        if (urlApiKey) {
+            document.getElementById('apiKeyInput').value = urlApiKey;
+            apiKey = urlApiKey;
+            loadAnalytics();
+        }
+    </script>
+</body>
+</html>

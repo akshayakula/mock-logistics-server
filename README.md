@@ -11,6 +11,7 @@ A lightweight Express server with mock logistics load data, providing flexible s
 - 🌐 **CORS Enabled** for all origins
 - 🚀 **fly.io Ready** with Docker configuration
 - 📊 **Complete Load Data** including RPM, weight, commodity, dimensions, and more
+- 📈 **Analytics API** for logging and tracking searches, bookings, and custom events
 
 ## Quick Start
 
@@ -195,11 +196,39 @@ curl -X POST \
 }
 ```
 
-#### 3. GET `/` - API Info
+#### 3. POST `/api/analytics` - Log Analytics Data
+
+Log analytics data for searches, bookings, or custom events. All analytics data is stored persistently.
+
+**See [ANALYTICS_API.md](./ANALYTICS_API.md) for complete documentation.**
+
+**Quick Example:**
+```bash
+curl -X POST \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mc_number": "347040",
+    "origin_state": "TX",
+    "destination_state": "CA",
+    "load_id": "L-1088",
+    "price": 5000,
+    "miles": 2511,
+    "weight": 16098,
+    "action_type": "booking"
+  }' \
+  http://localhost:3000/api/analytics
+```
+
+**Additional Analytics Endpoints:**
+- `GET /api/analytics` - Retrieve analytics data with optional filters
+- `GET /api/analytics/stats` - Get aggregated analytics statistics
+
+#### 4. GET `/` - API Info
 
 Returns information about the API endpoints (no authentication required).
 
-#### 4. GET `/health` - Health Check
+#### 5. GET `/health` - Health Check
 
 Returns server health status (no authentication required).
 
@@ -318,17 +347,25 @@ flyctl secrets set PORT=3000
 │   ├── middleware/
 │   │   └── auth.ts           # API key authentication
 │   ├── routes/
-│   │   └── loads.ts          # Load endpoints
+│   │   ├── loads.ts          # Load endpoints
+│   │   └── analytics.ts      # Analytics endpoints
 │   ├── data/
-│   │   └── mockLoads.ts      # Mock data generator
+│   │   ├── mockLoads.ts      # Mock data generator
+│   │   ├── storage.ts        # Persistent load storage
+│   │   └── analyticsStorage.ts # Persistent analytics storage
 │   └── types/
-│       └── load.ts           # TypeScript interfaces
+│       ├── load.ts           # Load TypeScript interfaces
+│       └── analytics.ts      # Analytics TypeScript interfaces
+├── data/
+│   ├── loads.json            # Persistent load data
+│   └── analytics.json        # Persistent analytics data
 ├── Dockerfile                 # Docker config for fly.io
 ├── fly.toml                   # fly.io configuration
 ├── package.json
 ├── tsconfig.json
 ├── .env.example
-└── README.md
+├── README.md
+└── ANALYTICS_API.md           # Analytics API documentation
 ```
 
 ### Scripts
@@ -338,9 +375,11 @@ flyctl secrets set PORT=3000
 - `npm start` - Run production build
 - `npm run type-check` - Check TypeScript types without building
 
-## Mock Data
+## Data Storage
 
-The server includes 80 pre-generated mock loads with:
+### Load Data
+
+The server includes 100 pre-generated mock loads with:
 - Diverse routes across 20+ major US cities
 - 6 equipment types (Dry Van, Reefer, Flatbed, Step Deck, Box Truck, Tanker)
 - 12 commodity types (Electronics, Food & Beverage, Machinery, etc.)
@@ -349,7 +388,11 @@ The server includes 80 pre-generated mock loads with:
 - Future pickup dates (1-10 days out)
 - ~15% pre-booked loads
 
-Data regenerates on each server restart (in-memory storage).
+Load data is **persistent** and stored in `data/loads.json`. If the file doesn't exist on startup, it will be created with the mock data. Bookings persist across server restarts.
+
+### Analytics Data
+
+Analytics data is stored persistently in `data/analytics.json`. All logged analytics entries (searches, bookings, custom events) are preserved across server restarts.
 
 ## CORS
 
