@@ -132,7 +132,7 @@ curl http://localhost:3000/
 # Shows: 100 total, 100 available, 0 booked
 
 # 3. Book a load
-curl -X POST -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -X POST -H "X-API-Key: [YOUR-API-KEY]" \
   http://localhost:3000/api/loads/L-1001/book
 
 # 4. Check stats again

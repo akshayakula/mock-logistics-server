@@ -63,31 +63,31 @@ curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
 
 **2. Find loads from Texas to California:**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&destination_state=CA"
 ```
 
 **3. Find Reefer loads with good pay (RPM > 2.5):**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?equipment_type=Reefer&min_rpm=2.5"
 ```
 
 **4. Find high-value, short-haul loads:**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?min_price=3000&max_miles=1500"
 ```
 
 **5. Find Dry Van loads from TX with specific criteria:**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?origin_state=TX&equipment_type=Dry%20Van&min_rpm=2.0&min_price=2000"
 ```
 
 **6. Find Electronics loads (specific commodity):**
 ```bash
-curl -H "X-API-Key: acme_dev_c4a9d02fb3" \
+curl -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads?commodity_type=Electronics&min_rpm=2.5"
 ```
 
@@ -141,7 +141,7 @@ Book a specific load by its ID. Once booked, the load becomes unavailable to oth
 **1. Book a specific load:**
 ```bash
 curl -X POST \
-  -H "X-API-Key: acme_dev_c4a9d02fb3" \
+  -H "X-API-Key: [YOUR-API-KEY-HERE]" \
   "https://mock-logistics-server.fly.dev/api/loads/L-1088/book"
 ```
 
